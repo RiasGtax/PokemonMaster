@@ -7,11 +7,11 @@ const Home: NextPage = () => {
       <div className='flex h-screen'>
         <main className='m-auto'>
           <h1 className="indexTitle">
-            <b>Welcome to <span className="pokemonName">Pokemon Battle</span></b>
+            <b>Welcome to <span className="pokemonName">Pokemon Battles</span></b>
           </h1>
 
           <Link href="/battle" passHref>
-            <button className="w-full btn">Lets fight!</button>
+            <button className="w-full btn btn-error">Lets fight!</button>
           </Link>
         </main>
 
