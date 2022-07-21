@@ -15,3 +15,10 @@ export type PokemonModel = {
   attack: number,
   defense: number
 };
+
+export enum Winner {
+  FIRST,
+  SECOND,
+  BOTH,
+  NONE
+}

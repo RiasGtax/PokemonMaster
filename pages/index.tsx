@@ -4,14 +4,14 @@ import Link from 'next/link'
 const Home: NextPage = () => {
   return (
     <>
-      <div className='grid grid-cols-8'>
-        <main className='col-start-2 col-span-4'>
-          <h1>
-            Welcome to Pokemon Battle
+      <div className='flex h-screen'>
+        <main className='m-auto'>
+          <h1 className="indexTitle">
+            <b>Welcome to <span className="pokemonName">Pokemon Battle</span></b>
           </h1>
 
           <Link href="/battle" passHref>
-            <button className='btn'>Lets fight!</button>
+            <button className="w-full btn">Lets fight!</button>
           </Link>
         </main>
 

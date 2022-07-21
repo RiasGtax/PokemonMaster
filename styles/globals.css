@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.loadingTitle {
+  font-size: 50px;
+  color: white;
+}
+
+.indexTitle {
+  font-size: 50px;
+  color: white;
+}
+
+.pokemonName {
+  color: red
+}
