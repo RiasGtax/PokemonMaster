@@ -1,11 +1,13 @@
 import { useAtom } from "jotai";
 import { NextPage } from "next";
 import Image from "next/image";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { lazy, SetStateAction, useEffect, useState } from "react";
 import Loading from "../components/loading";
 import { pokemonLibrary, selectedPokemon1, selectedPokemon2 } from "../global/pokemon_storage";
 import { capitalize } from "../global/util";
 import { PokemonBasicInfoModel, PokemonModel, Winner } from "../models/pokemon-models";
+
+const Table = lazy(() => import("../components/table"))
 
 /**
  * Gets info from 10 random pokemons and returns it
@@ -22,7 +24,7 @@ const getRandomPokemons = async (
   isLoading: React.Dispatch<SetStateAction<boolean>>) => {
 
   isLoading(true)
-  let list: PokemonBasicInfoModel[] = [];
+  let list: PokemonBasicInfoModel[] = []
   try {
     // First API call to get info of 10 random pokemons
     const randomNumber = Math.floor(Math.random() * 1000);
@@ -30,29 +32,33 @@ const getRandomPokemons = async (
     const json = await apiResponse.json();
     setStatus(200)
 
-    list = json.results;
+    list = json.results
   } catch (error) {
+    setStatus(500)
     setError(error)
   }
 
+  const result: PokemonModel[] = []
   // Loop each pokemon of the 10 selected ones above and query the API to get extra info like their attack and defense
-  const result: PokemonModel[] = [];
   for (let pokemon of list) {
     const apiResponse = await fetch("https://pokeapi.co/api/v2/pokemon/" + pokemon.name);
-    const json = await apiResponse.json();
+    const json = await apiResponse.json()
 
     // Get extra info
-    let attack: number = json.stats.find((e: any) => e.stat.name === "attack").base_stat;
-    let defense: number = json.stats.find((e: any) => e.stat.name === "defense").base_stat;
+    let attack: number = json.stats.find((e: any) => e.stat.name === "attack").base_stat
+    let defense: number = json.stats.find((e: any) => e.stat.name === "defense").base_stat
+    let image: string = json.sprites.front_default
 
     result.push({
       name: pokemon.name,
       attack: attack,
-      defense: defense
+      defense: defense,
+      image: image
     });
   }
-  setDataAPI(result)
-  isLoading(false)
+
+  // Timeout para mostrar la pantalla de carga
+  setTimeout(() => { setDataAPI(result); isLoading(false) }, 2000)
 };
 
 /**
@@ -67,8 +73,8 @@ const fight = (
   setVictory: React.Dispatch<SetStateAction<Winner>>) => {
 
   // Pokemon actions
-  const points1 = pokemon1.attack - pokemon2.defense * Math.floor(Math.random());
-  const points2 = pokemon2.attack - pokemon1.defense * Math.floor(Math.random());
+  const points1 = pokemon1.attack - pokemon2.defense * Math.floor(Math.random())
+  const points2 = pokemon2.attack - pokemon1.defense * Math.floor(Math.random())
 
   // Check who is the winner and set the value
   if (points1 > points2) {
@@ -103,7 +109,7 @@ const selectedPokemon = (
 const resetPokemon = (
   setPokemonObj: React.Dispatch<SetStateAction<PokemonModel>>) => {
 
-  setPokemonObj({ name: "", attack: 0, defense: 0 })
+  setPokemonObj({ name: "", attack: 0, defense: 0, image: "" })
 }
 
 const Battle: NextPage = () => {
@@ -128,7 +134,6 @@ const Battle: NextPage = () => {
   useEffect(() => {
     getRandomPokemons(setStatus, setError, setDataAPI, isLoading)
   }, []);
-  if (loading) return <Loading />
   if (status != 200) return <p>An error has ocurred, error: {error}</p>
 
   return (
@@ -136,9 +141,9 @@ const Battle: NextPage = () => {
       <div className="m-10">
         <div className="grid grid-cols-9">
           <div className="col-start-2 col-end-4">
-            <div className="basis-1/4">
+            <div className="basis-1/4 m-auto">
               <Image
-                src={'/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
+                src={selectedPokemonObj1.image ? selectedPokemonObj1.image : '/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
               />
             </div>
             <div className="basis-3/4">
@@ -156,9 +161,7 @@ const Battle: NextPage = () => {
                     <b>Attack</b>
                   </div>
                   <div>
-                    <select className="select select-bordered">
-                      {selectedPokemonObj1 ? (<option disabled selected>{selectedPokemonObj1.attack}</option>) : (<option disabled selected>No info</option>)}
-                    </select>
+                    <b>{selectedPokemonObj1 ? selectedPokemonObj1.attack : <div>No info</div>}</b>
                   </div>
                 </div>
                 <div className="basis-1/2">
@@ -166,9 +169,7 @@ const Battle: NextPage = () => {
                     <b>Defense</b>
                   </div>
                   <div>
-                    <select className="select select-bordered">
-                      {selectedPokemonObj1 ? (<option disabled selected>{selectedPokemonObj1.defense}</option>) : (<option disabled selected>No info</option>)}
-                    </select>
+                    <b>{selectedPokemonObj1 ? selectedPokemonObj1.defense : <div>No info</div>}</b>
                   </div>
                 </div>
               </div>
@@ -176,13 +177,13 @@ const Battle: NextPage = () => {
           </div>
           <br />
           <div className="col-start-5 col-end-6">
-            <button className="h-1/2 mt-16 w-full btn btn-error" disabled={selectedPokemonName1 === "none" || selectedPokemonName2 === "none"} onClick={() => { fight(selectedPokemonObj1, selectedPokemonObj2, setVictory) }}>Fight!</button>
+            <button className="h-1/2 mt-16 w-full btn btn-error" disabled={selectedPokemonName1 === "" || selectedPokemonName2 === ""} onClick={() => { fight(selectedPokemonObj1, selectedPokemonObj2, setVictory) }}>Fight!</button>
           </div>
           <br />
           <div className="col-start-7 col-end-9">
             <div className="basis-1/4">
               <Image
-                src={'/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
+                src={selectedPokemonObj2.image ? selectedPokemonObj2.image : '/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
               />
             </div>
             <div className="basis-3/4">
@@ -200,9 +201,7 @@ const Battle: NextPage = () => {
                     <b>Attack</b>
                   </div>
                   <div>
-                    <select className="select select-bordered">
-                      {selectedPokemonObj2 ? (<option disabled selected>{selectedPokemonObj2.attack}</option>) : (<option disabled selected>No info</option>)}
-                    </select>
+                    <b>{selectedPokemonObj2 ? selectedPokemonObj2.attack : <div>No info</div>}</b>
                   </div>
                 </div>
                 <div className="basis-1/2">
@@ -210,9 +209,7 @@ const Battle: NextPage = () => {
                     <b>Defense</b>
                   </div>
                   <div>
-                    <select className="select select-bordered">
-                      {selectedPokemonObj2 ? (<option disabled selected>{selectedPokemonObj2.defense}</option>) : (<option disabled selected>No info</option>)}
-                    </select>
+                    <b>{selectedPokemonObj2 ? selectedPokemonObj2.defense : <div>No info</div>}</b>
                   </div>
                 </div>
               </div>
@@ -234,24 +231,7 @@ const Battle: NextPage = () => {
             <div className="indexTitle text-center">
               <b>Pokemon List</b>
             </div>
-            <table className="table table-compact w-full table-zebra">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th className="text-center">Attack</th>
-                  <th className="text-center">Defense</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataAPI?.map((obj) => {
-                  return (<tr>
-                    <td><b>{capitalize(obj.name)}</b></td>
-                    <td className="text-center">{obj.attack}</td>
-                    <td className="text-center">{obj.defense}</td>
-                  </tr>)
-                })}
-              </tbody>
-            </table>
+            {loading ? <Loading /> : <Table />}
             <br />
             <div>
               <button className="w-full btn btn-success" onClick={() => { getRandomPokemons(setStatus, setError, setDataAPI, isLoading); resetPokemon(setSelectedPokemonObj1); resetPokemon(setSelectedPokemonObj2); setVictory(Winner.NONE) }}>Get other pokemons</button>

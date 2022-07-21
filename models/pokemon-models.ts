@@ -13,7 +13,8 @@ export type PokemonBasicInfoModel = {
 export type PokemonModel = {
   name: string;
   attack: number,
-  defense: number
+  defense: number,
+  image: string
 };
 
 export enum Winner {
