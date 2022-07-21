@@ -1,6 +1,4 @@
-import { NextPage } from "next";
-
-const Loading: NextPage = () => {
+const Loading = () => {
   return (
     <>
       <div className="flex h-screen">

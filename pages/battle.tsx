@@ -1,9 +1,11 @@
+import { useAtom } from "jotai";
 import { NextPage } from "next";
 import Image from "next/image";
 import React, { SetStateAction, useEffect, useState } from "react";
+import Loading from "../components/loading";
+import { pokemonLibrary, selectedPokemon1, selectedPokemon2 } from "../global/pokemon_storage";
 import { capitalize } from "../global/util";
 import { PokemonBasicInfoModel, PokemonModel, Winner } from "../models/pokemon-models";
-import Loading from "./loading";
 
 /**
  * Gets info from 10 random pokemons and returns it
@@ -15,8 +17,8 @@ import Loading from "./loading";
  */
 const getRandomPokemons = async (
   setStatus: React.Dispatch<SetStateAction<number>>,
-  setDataAPI: React.Dispatch<SetStateAction<PokemonModel[]>>,
   setError: React.Dispatch<SetStateAction<any>>,
+  setDataAPI: React.Dispatch<SetStateAction<PokemonModel[]>>,
   isLoading: React.Dispatch<SetStateAction<boolean>>) => {
 
   isLoading(true)
@@ -88,16 +90,9 @@ const fight = (
 const selectedPokemon = (
   pokemonName: string,
   pokemonList: PokemonModel[],
-  setSelectedName: React.Dispatch<SetStateAction<any>>,
   setSelectedPokemons: React.Dispatch<SetStateAction<any>>) => {
 
-  if (pokemonName === "none") {
-    setSelectedName("none")
-  } else {
-    // TODO: Fix esos anys
-    setSelectedName(pokemonList.find(e => e.name === pokemonName.toLowerCase())?.name)
-    setSelectedPokemons(pokemonList.find(e => e.name === pokemonName.toLowerCase()))
-  }
+  setSelectedPokemons(pokemonList.find(e => e.name === pokemonName.toLowerCase()))
 }
 
 /**
@@ -106,33 +101,32 @@ const selectedPokemon = (
  * @param setPokemonObj 
  */
 const resetPokemon = (
-  setPokemonName: React.Dispatch<SetStateAction<string>>,
   setPokemonObj: React.Dispatch<SetStateAction<PokemonModel>>) => {
 
-  setPokemonName("none")
   setPokemonObj({ name: "", attack: 0, defense: 0 })
 }
 
 const Battle: NextPage = () => {
   const [loading, isLoading] = useState<boolean>(false)
-  const [status, setStatus] = useState<number>(200)
-  const [dataAPI, setDataAPI] = useState<PokemonModel[]>([])
+  const [status, setStatus] = useState<number>(0)
   const [error, setError] = useState<any>()
 
+  const [dataAPI, setDataAPI] = useAtom(pokemonLibrary)
+
   // Pokemon 1
-  const [selectedPokemonName1, setSelectedPokemonName1] = useState<string>("none")
-  const [selectedPokemonObj1, setSelectedPokemonObj1] = useState<PokemonModel>({ name: "", attack: 0, defense: 0 })
+  const [selectedPokemonObj1, setSelectedPokemonObj1] = useAtom(selectedPokemon1)
+  const selectedPokemonName1 = selectedPokemonObj1.name
 
   // Pokemon 2
-  const [selectedPokemonName2, setSelectedPokemonName2] = useState<string>("none")
-  const [selectedPokemonObj2, setSelectedPokemonObj2] = useState<PokemonModel>({ name: "", attack: 0, defense: 0 })
+  const [selectedPokemonObj2, setSelectedPokemonObj2] = useAtom(selectedPokemon2)
+  const selectedPokemonName2 = selectedPokemonObj2.name
 
   // Victory tracker
   const [victory, setVictory] = useState<Winner>(Winner.NONE)
 
   // Query info to the API
   useEffect(() => {
-    getRandomPokemons(setStatus, setDataAPI, setError, isLoading)
+    getRandomPokemons(setStatus, setError, setDataAPI, isLoading)
   }, []);
   if (loading) return <Loading />
   if (status != 200) return <p>An error has ocurred, error: {error}</p>
@@ -149,8 +143,8 @@ const Battle: NextPage = () => {
             </div>
             <div className="basis-3/4">
               <div className="flex-row">
-                <select className="select select-bordered w-full" value={selectedPokemonName1} onChange={(e) => selectedPokemon(e.target.value, dataAPI, setSelectedPokemonName1, setSelectedPokemonObj1)}>
-                  <option key="none" value="none">Pick one</option>
+                <select className="select select-bordered w-full" value={selectedPokemonName1} onChange={(e) => selectedPokemon(e.target.value, dataAPI, setSelectedPokemonObj1)}>
+                  <option key="" value="">Pick one</option>
                   {dataAPI?.map((obj) => {
                     return (<option key={obj.name} value={obj.name}>{capitalize(obj.name)}</option>)
                   })}
@@ -193,8 +187,8 @@ const Battle: NextPage = () => {
             </div>
             <div className="basis-3/4">
               <div className="flex-row">
-                <select className="select select-bordered w-full" value={selectedPokemonName2} onChange={(e) => selectedPokemon(e.target.value, dataAPI, setSelectedPokemonName2, setSelectedPokemonObj2)}>
-                  <option key="none" value="none">Pick one</option>
+                <select className="select select-bordered w-full" value={selectedPokemonName2} onChange={(e) => selectedPokemon(e.target.value, dataAPI, setSelectedPokemonObj2)}>
+                  <option key="" value="">Pick one</option>
                   {dataAPI?.map((obj) => {
                     return (<option key={obj.name} value={obj.name}>{capitalize(obj.name)}</option>)
                   })}
@@ -260,7 +254,7 @@ const Battle: NextPage = () => {
             </table>
             <br />
             <div>
-              <button className="w-full btn btn-success" onClick={() => { getRandomPokemons(setStatus, setDataAPI, setError, isLoading); resetPokemon(setSelectedPokemonName1, setSelectedPokemonObj1); resetPokemon(setSelectedPokemonName2, setSelectedPokemonObj2); setVictory(Winner.NONE) }}>Get other pokemons</button>
+              <button className="w-full btn btn-success" onClick={() => { getRandomPokemons(setStatus, setError, setDataAPI, isLoading); resetPokemon(setSelectedPokemonObj1); resetPokemon(setSelectedPokemonObj2); setVictory(Winner.NONE) }}>Get other pokemons</button>
             </div>
           </div>
         </div>
