@@ -98,7 +98,18 @@ const selectedPokemon = (
   pokemonList: PokemonModel[],
   setSelectedPokemons: React.Dispatch<SetStateAction<any>>) => {
 
-  setSelectedPokemons(pokemonList.find(e => e.name === pokemonName.toLowerCase()))
+  // Check if the selected option is not the empty one in the <select> element
+  // In case thats the selected option just change the selected pokemon to a default object
+  if (pokemonName) {
+    setSelectedPokemons(pokemonList.find(e => e.name === pokemonName.toLowerCase()))
+  } else {
+    setSelectedPokemons({
+      name: "",
+      attack: 0,
+      defense: 0,
+      image: "/image/profile.png",
+    })
+  }
 }
 
 /**
@@ -109,7 +120,7 @@ const selectedPokemon = (
 const resetPokemon = (
   setPokemonObj: React.Dispatch<SetStateAction<PokemonModel>>) => {
 
-  setPokemonObj({ name: "", attack: 0, defense: 0, image: "" })
+  setPokemonObj({ name: "", attack: 0, defense: 0, image: "/image/profile.png" })
 }
 
 const Battle: NextPage = () => {
@@ -143,7 +154,7 @@ const Battle: NextPage = () => {
           <div className="col-start-2 col-end-4">
             <div className="basis-1/4 m-auto">
               <Image
-                src={selectedPokemonObj1.image ? selectedPokemonObj1.image : '/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
+                src={selectedPokemonObj1.image} alt="Profile image" width={100} height={100} layout={"fixed"}
               />
             </div>
             <div className="basis-3/4">
@@ -183,7 +194,7 @@ const Battle: NextPage = () => {
           <div className="col-start-7 col-end-9">
             <div className="basis-1/4">
               <Image
-                src={selectedPokemonObj2.image ? selectedPokemonObj2.image : '/image/profile.png'} alt="Profile image" width={100} height={100} layout={"fixed"}
+                src={selectedPokemonObj2.image} alt="Profile image" width={100} height={100} layout={"fixed"}
               />
             </div>
             <div className="basis-3/4">

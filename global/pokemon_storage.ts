@@ -7,11 +7,12 @@ export const selectedPokemon1 = atom<PokemonModel>({
   name: "",
   attack: 0,
   defense: 0,
-  image: "",
+  image: "/image/profile.png",
 });
+
 export const selectedPokemon2 = atom<PokemonModel>({
   name: "",
   attack: 0,
   defense: 0,
-  image: "",
+  image: "/image/profile.png",
 });
